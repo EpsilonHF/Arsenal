@@ -2,7 +2,6 @@
 
 整理了在分析和建模过程中常用的工具
 
-
 ## 相关性分析
 
 ### Pearson相关系数
@@ -33,13 +32,25 @@ MIC 可以计算非线性相关的变量之间的相关度
 
 ## 异常值分析
 
-### 1 维数据
+### K Sigma
 
-- 3 sigma
+如果数据(单维)符合正态分布，可以使用3 sigma准则。可以使用 ks 检验来判断数据集是否符合正态分布。有时需要对数据进行对数变换。
 
-### 2 维数据
+### DBscan
 
-### 多维数据
+>A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise
+
+适合对2维数据进行聚类，找出异常值。
+
+实现[Python]: [DBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html)
+
+### Isolation Forest
+
+>Isolation-based Anomaly Detection
+
+iForest用于挖掘异常数据，如网络安全中的攻击检测和流量异常分析，金融机构则用于挖掘出欺诈行为。算法对内存要求很低，且处理速度很快，**其时间复杂度也是线性的。可以很好的处理高维数据和大数据**，并且也可以作为在线异常检测。
+
+实现[Python]: [IsolationForest](https://scikit-learn.org/dev/modules/generated/sklearn.ensemble.IsolationForest.html)
 
 ## 特征筛选
 
@@ -97,23 +108,79 @@ $l_1$ 范数的约束通常会使得最优解位于坐标轴上，而从使得�
 
 [文档地址](https://github.com/hyperopt/hyperopt/wiki)
 
+### advisor
+
+>Google Vizier: A Service for Black-Box Optimization
+
+Google Vizier 自动调参平台的开源实现，集成了大部分的自动化调参工具，并提供了界面。
+
+实现[Python]: [advisor](https://github.com/tobegit3hub/advisor)
+
+官方文档: [文档](https://advisor.readthedocs.io/en/latest/index.html)
+
 ## 时序预测
 
 ### ARIMA
 
+**ARIMA 模型是在平稳的时间序列基础上建立起来的，因此时间序列的平稳性是建模的重要前提。**检验时间序列模型平稳的方法一般采用 ADF 单位根检验模型去检验。当然如果时间序列不稳定，也可以通过一些操作去使得时间序列稳定（比如取对数，差分），然后进行 ARIMA 模型预测，得到稳定的时间序列的预测结果，然后对预测结果进行之前使序列稳定的操作的逆操作（取指数，差分的逆操作），就可以得到原始数据的预测结果。
+
+$$
+y_{t}=\mu+\sum_{i=1}^{p} \gamma_{i} y_{t-i}+\epsilon_{t}+\sum_{i=1}^{q} \theta_{i} \epsilon_{t-i}
+$$
+
+实现[Python]: [statsmodels.tsa.arima_model.ARIMA](http://www.statsmodels.org/stable/generated/statsmodels.tsa.arima_model.ARIMA.html#statsmodels.tsa.arima_model.ARIMA)
+
 ### STL 分解
+
+>STL: A Seasonal-Trend Decomposition Procedure Based on Loess
+
+STL是一种把时间序列分解为趋势项(trend component)、季节项(seasonal component)和余项(remainder component)的过滤过程。
+
+实现[Python]: [statsmodels.tsa.seasonal.seasonal_decompose](http://www.statsmodels.org/stable/generated/statsmodels.tsa.seasonal.seasonal_decompose.html#statsmodels.tsa.seasonal.seasonal_decompose)
+
 
 ### Fb Prophet
 
-[官网地址](https://facebook.github.io/prophet/)，Facebook 开源的时序预测工具
+Facebook 开源的时序预测工具，在基础STL分解的基础上，增加了节假日影响，将周期固定位：年、月、日，自动检测周期性和变点自动检测。
+
+官网地址: [Prophet](https://facebook.github.io/prophet/)
 
 ## 时序滤波
+
+### kalman 滤波
+
+卡尔曼滤波利用目标的动态信息，设法去掉噪声的影响，得到一个关于目标位置的估计。可以是当前目标位置的估计（滤波），将来位置的估计（预测），过去位置的估计（插值或平滑）。
+卡尔曼滤波通过递归估计的方法，在获知上一时刻的估计值及当前时刻的观测值，计算当前时刻的估计值。
+在获知上一时刻的估计值及当前时刻的观测值后，计算当前时刻估计值包括预测和更新两步，在预测过程中，获知上一时刻的估计值，计算当前时刻估计值，具体方法如下：
+
+
+预测：
+$$
+\hat{x}{k|k-1} =F{K} \hat{x}{k-1|k-1}+B{k} u_{k} \\
+P_{k|k-1} =F_{k} P_{k-1 | k-1} F_{k}^{T}+Q_{k}
+$$
+
+
+更新：
+$$
+{\tilde{y}{k}=Z{k}-H_{k} \hat{x}{k|k-1}} \\ {S_{k}=H_{K} P_{k|k-1} H_{k}^{T}+R_{k}} \\  {K_{k}=P_{k|k-1} H_{k}^{T} S_{k}^{-1}} \\ {\hat{x}{k|k}=\hat{x}{k|k-1}+K_{k} \tilde{y}{k}} \\ {P{k|k}=\left(I-K_{k} H_{k}\right) P_{k | k-1}}
+$$
+
+实现[Python]: [SciPy Cookbook](https://scipy-cookbook.readthedocs.io/items/KalmanFiltering.html)
+
+### forward-backward filtering
+
+>Determining the initial states in forward-backward filtering
+
+对信号做两次线性滤波，一次向前、一次向后，最终结果没有相位差。
+
+实现[Python]: [scipy.signal.filtfilt](https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.signal.filtfilt.html)
 
 ## 稳定性检测
 
 ### ADF test
 
-在统计学中 augmented Dickey–Fuller test 用于检测时序数据的平稳性和周期性检测方法，其原假设为时序存在单位根，并计算满足该假设的 p 值， 如果 p 值过小，则否定原假设——时序数据不存在周期性。具体方法如下：
+在统计学中 Augmented Dickey–Fuller test 用于检测时序数据的平稳性和周期性检测方法，其原假设为时序存在单位根，并计算满足该假设的 p 值， 如果 p 值过小，则否定原假设——时序数据不存在周期性。具体方法如下：
 
 
 创建回归模型，对时序数据进行拟合，模型的具体方程为：
@@ -130,13 +197,17 @@ $$
 
 **ps**： ADF test 不支持含有趋势性的时序数据检验，因此在检测前必须去除趋势性
 
-实现[Python]: 
+实现[Python]: [statsmodels.tsa.stattools.adfuller](https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.adfuller.html)
 
 ## 时序异常
 
 ### EDM 算法
 
 >Leveraging Cloud Data to Mitigate User Experience from ‘Breaking Bad’
+
+- EDM使用E-statstics统计方法来检测平均值的差异，通常，EDM算法也可以用于检测给定时间序列中的分布的变化情况。
+- EDM使用较为鲁棒的统计指标，并通过组合测试的方法进行显著性的检验。
+- EDM算法是非参数的，很多数据并不遵循简单意义上的正太分布，具有较好的适用性。
 
 实现[R]: [BreakoutDetection](https://github.com/twitter/BreakoutDetection)
 
@@ -146,6 +217,14 @@ $$
 ### PELT 算法
 
 >Optimal detection of changepoints with a linear computational cost
+
+方法的目标是最小化如下目标：
+
+$$
+\sum_{i=1}^{m+1}\left[C(y_{(\tau_{i-1}+1) \cdot z_{i}})+\beta\right)]
+$$
+
+实现[Python]: [changepy](https://github.com/ruipgil/changepy)
 
 ### Bayes
 >Modeling Changing Dependency Structure in Multivariate Time Series
