@@ -36,13 +36,13 @@ MIC 可以计算非线性相关的变量之间的相关度
 
 如果数据(单维)符合正态分布，可以使用3 sigma准则。可以使用 ks 检验来判断数据集是否符合正态分布。有时需要对数据进行对数变换。
 
-### DBscan
+### Local Outlier Factor
 
->A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise
+>LOF: identifying density-based local outliers
 
-适合对2维数据进行聚类，找出异常值。
+通过计算数据分布的密度，找出低密度的数据点，作为异常值。
 
-实现[Python]: [DBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html)
+实现[Python]: [sklearn.neighbors.LocalOutlierFactor](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html#sklearn.neighbors.LocalOutlierFactor)
 
 ### Isolation Forest
 
@@ -51,6 +51,14 @@ MIC 可以计算非线性相关的变量之间的相关度
 iForest用于挖掘异常数据，如网络安全中的攻击检测和流量异常分析，金融机构则用于挖掘出欺诈行为。算法对内存要求很低，且处理速度很快，**其时间复杂度也是线性的。可以很好的处理高维数据和大数据**，并且也可以作为在线异常检测。
 
 实现[Python]: [IsolationForest](https://scikit-learn.org/dev/modules/generated/sklearn.ensemble.IsolationForest.html)
+
+### One-Class SVM
+
+> Estimating the support of a high-dimensional distribution
+
+使用svm实现的异常检测方法
+
+实现[Python]: [sklearn.svm.OneClassSVM](https://scikit-learn.org/stable/modules/generated/sklearn.svm.OneClassSVM.html#sklearn.svm.OneClassSVM)
 
 ## 特征筛选
 
